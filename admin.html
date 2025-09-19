@@ -9,21 +9,21 @@
   <script src="script.js" defer></script>
 </head>
 <body>
-  <div class="container">
-    <h2>Admin Panel</h2>
-    <p>Tambah dan kelola link asesmen</p>
+  <div class="container card-style">
+    <div class="header">
+      <img src="logo.png" alt="Logo" class="logo">
+      <h2>Admin Panel</h2>
+      <p>Kelola link asesmen kompetensi</p>
+    </div>
 
-    <form id="add-link-form">
-      <label>Judul Link</label>
-      <input type="text" id="title" required>
-      <label>URL</label>
-      <input type="url" id="url" required>
-      <label>Kategori</label>
-      <input type="text" id="category">
+    <form id="add-link-form" class="form-style">
+      <input type="text" id="title" placeholder="Judul Link" required>
+      <input type="url" id="url" placeholder="URL" required>
+      <input type="text" id="category" placeholder="Kategori">
       <button type="submit" class="btn-primary">Tambah Link</button>
     </form>
 
-    <table id="links-table">
+    <table id="links-table" class="modern-table">
       <thead>
         <tr>
           <th>Judul</th>
@@ -35,8 +35,9 @@
       <tbody></tbody>
     </table>
 
-    <button onclick="logout()" class="btn-danger">Logout</button>
+    <button onclick="logout()" class="btn-logout">Logout</button>
   </div>
 </body>
 </html>
+
 
