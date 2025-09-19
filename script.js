@@ -105,3 +105,28 @@ async function logout() {
   window.location.href = "index.html";
 }
 
+document.addEventListener("DOMContentLoaded", () => {
+  const role = localStorage.getItem("role"); 
+  const menuDiv = document.getElementById("menu");
+
+  if (menuDiv) {
+    if (role === "admin") {
+      menuDiv.innerHTML = `
+        <a href="admin.html" class="btn">Kelola Data (CRUD)</a>
+        <a href="laporan.html" class="btn">Laporan</a>
+        <a href="formulir.html" class="btn">Formulir</a>
+      `;
+    } else {
+      menuDiv.innerHTML = `
+        <a href="client.html" class="btn">Lihat Data</a>
+        <a href="formulir.html" class="btn">Formulir</a>
+      `;
+    }
+  }
+});
+
+function logout() {
+  localStorage.removeItem("role");
+  window.location.href = "index.html";
+}
+
