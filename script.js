@@ -42,8 +42,11 @@ async function loadLinks() {
 
   linksContainer.innerHTML = data.map(l => `
     <a href="${l.url}" target="_blank" class="link-card">
-      <h3>${l.title}</h3>
-      <p>${l.category ?? "Umum"}</p>
+      <span class="link-icon">📑</span>
+      <div>
+        <div>${l.title}</div>
+        <small style="color:#6b7280">${l.category ?? "Umum"}</small>
+      </div>
     </a>
   `).join("");
 }
