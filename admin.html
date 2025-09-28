@@ -5,8 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Asesmen Kompetensi</title>
   <link rel="stylesheet" href="assets/style/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="script.js" defer></script>
+  <!-- Supabase JS (versi module) -->
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const SUPABASE_URL = "https://utsyujgdlahuegjwpiab.supabase.co";
+    const SUPABASE_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3l1amdkbGFodWVnandwaWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTMzOTMsImV4cCI6MjA3Mzg2OTM5M30.mNNJOlgYdYIYarrbu8CLALqQrfVEWd9eDZp1MN_x-Ls";
+
+    const supa = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ==== Proteksi Akses ====
+    document.addEventListener("DOMContentLoaded", async () => {
+      const role = localStorage.getItem("role");
+      if (!role) {
+        alert("Anda harus login terlebih dahulu!");
+        window.location.href = "login.html";
+        return;
+      }
+
+      if (role !== "admin") {
+        alert("Akses ditolak. Anda bukan admin!");
+        window.location.href = "client.html";
+        return;
+      }
+
+      loadAdminLinks();
+    });
+
+    // === CRUD LINKS ===
+    const addLinkForm = document.getElementById("add-link-form");
+    addLinkForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const title = document.getElementById("title").value;
+      const url = document.getElementById("url").value;
+      const category = document.getElementById("category").value;
+
+      const { error } = await supa.from("links").insert([{ title, url, category }]);
+      if (error) {
+        alert("Gagal tambah link: " + error.message);
+        return;
+      }
+      loadAdminLinks();
+      addLinkForm.reset();
+    });
+
+    async function loadAdminLinks() {
+      const { data, error } = await supa
+        .from("links")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Gagal ambil data:", error);
+        return;
+      }
+
+      const tbody = document.querySelector("#links-table tbody");
+      tbody.innerHTML = data
+        .map(
+          (l) => `
+          <tr>
+            <td>${l.title}</td>
+            <td><a href="${l.url}" target="_blank">${l.url}</a></td>
+            <td>${l.category ?? "-"}</td>
+            <td><button onclick="deleteLink(${l.id})" class="btn-danger">Hapus</button></td>
+          </tr>`
+        )
+        .join("");
+    }
+
+    window.deleteLink = async function (id) {
+      if (!confirm("Yakin ingin menghapus link ini?")) return;
+      const { error } = await supa.from("links").delete().eq("id", id);
+      if (error) {
+        alert("Gagal hapus link: " + error.message);
+        return;
+      }
+      loadAdminLinks();
+    };
+
+    window.logout = async function () {
+      await supa.auth.signOut();
+      localStorage.removeItem("role");
+      window.location.href = "login.html";
+    };
+  </script>
 </head>
 <body>
   <div class="container card-style">
@@ -39,5 +123,6 @@
   </div>
 </body>
 </html>
+
 
 
