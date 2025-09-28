@@ -6,19 +6,17 @@
   <title>Login - Asesmen Kompetensi</title>
   <link rel="stylesheet" href="assets/style/style.css">
   <style>
-    /* Tambahan styling khusus form login */
+    /* Styling khusus form login */
     .form-group {
       text-align: left;
       margin-bottom: 15px;
     }
-
     label {
       display: block;
       font-size: 14px;
       margin-bottom: 5px;
       color: #333;
     }
-
     input[type="email"],
     input[type="password"] {
       width: 100%;
@@ -29,12 +27,10 @@
       transition: 0.3s;
       font-size: 14px;
     }
-
     input:focus {
       border-color: #4f46e5;
       box-shadow: 0 0 5px rgba(79, 70, 229, 0.3);
     }
-
     .btn-submit {
       width: 100%;
       background: #4f46e5;
@@ -47,24 +43,21 @@
       cursor: pointer;
       transition: background 0.3s, transform 0.2s;
     }
-
     .btn-submit:hover {
       background: #3730a3;
       transform: translateY(-2px);
     }
-
     .register-link {
       margin-top: 15px;
       font-size: 14px;
       color: #666;
+      text-align: center;
     }
-
     .register-link a {
       color: #4f46e5;
       text-decoration: none;
       font-weight: 600;
     }
-
     .register-link a:hover {
       text-decoration: underline;
     }
@@ -91,45 +84,62 @@
     </div>
   </div>
 
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const supa = supabase.createClient(
-      "https://utsyujgdlahuegjwpiab.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3l1amdkbGFodWVnandwaWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTMzOTMsImV4cCI6MjA3Mzg2OTM5M30.mNNJOlgYdYIYarrbu8CLALqQrfVEWd9eDZp1MN_x-Ls"
-    );
+  <!-- Supabase JS -->
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const SUPABASE_URL = "https://utsyujgdlahuegjwpiab.supabase.co";
+    const SUPABASE_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3l1amdkbGFodWVnandwaWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTMzOTMsImV4cCI6MjA3Mzg2OTM5M30.mNNJOlgYdYIYarrbu8CLALqQrfVEWd9eDZp1MN_x-Ls";
+
+    const supa = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     async function login() {
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
 
       if (!email || !password) {
         alert("Email dan password wajib diisi.");
         return;
       }
 
+      // Login user
       const { data, error } = await supa.auth.signInWithPassword({ email, password });
-
       if (error) {
         alert("Login gagal: " + error.message);
+        return;
+      }
+
+      // Ambil role dari tabel profiles
+      const { data: profile, error: profileError } = await supa
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (profileError) {
+        alert("Gagal mengambil data profile: " + profileError.message);
+        return;
+      }
+
+      if (!profile) {
+        alert("Profil tidak ditemukan. Hubungi admin untuk melengkapi data Anda.");
+        return;
+      }
+
+      // Simpan role ke localStorage
+      localStorage.setItem("role", profile.role);
+
+      // Redirect sesuai role
+      if (profile.role === "admin") {
+        window.location.href = "admin.html";
       } else {
-        const { data: userData, error: userError } = await supa
-          .from("users")
-          .select("role")
-          .eq("email", email)
-          .single();
-
-        if (userError) {
-          alert("Gagal ambil role: " + userError.message);
-          return;
-        }
-
-        localStorage.setItem("role", userData.role);
-        window.location.href = "dashboard.html";
+        window.location.href = "client.html";
       }
     }
   </script>
 </body>
 </html>
+
 
 
