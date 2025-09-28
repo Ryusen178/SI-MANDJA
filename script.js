@@ -1,4 +1,5 @@
-const { createClient } = supabase;
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
 const SUPABASE_URL = "https://utsyujgdlahuegjwpiab.supabase.co";
 const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3l1amdkbGFodWVnandwaWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTMzOTMsImV4cCI6MjA3Mzg2OTM5M30.mNNJOlgYdYIYarrbu8CLALqQrfVEWd9eDZp1MN_x-Ls";
 const supa = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -11,15 +12,31 @@ if (loginForm) {
     const email = document.getElementById("email").value;
     const password = document.getElementById("password").value;
 
+    // Login dengan email & password
     const { data, error } = await supa.auth.signInWithPassword({ email, password });
     if (error) {
       alert("Login gagal: " + error.message);
       return;
     }
 
-    // Ambil role user dari profile (misal tabel 'profiles')
-    const { data: profile } = await supa.from("profiles").select("role").eq("id", data.user.id).single();
-    if (profile?.role === "admin") {
+    const userId = data.user.id;
+
+    // Ambil role user dari tabel users berdasarkan UID
+    const { data: userData, error: userError } = await supa
+      .from("users")
+      .select("role")
+      .eq("id", userId)
+      .maybeSingle();
+
+    if (userError || !userData) {
+      alert("Role user tidak ditemukan, pastikan tabel users sudah diisi!");
+      return;
+    }
+
+    localStorage.setItem("role", userData.role);
+
+    // Redirect sesuai role
+    if (userData.role === "admin") {
       window.location.href = "admin.html";
     } else {
       window.location.href = "client.html";
@@ -102,9 +119,11 @@ async function deleteLink(id) {
 // === LOGOUT ===
 async function logout() {
   await supa.auth.signOut();
+  localStorage.removeItem("role");
   window.location.href = "index.html";
 }
 
+// === RENDER MENU DI INDEX ===
 document.addEventListener("DOMContentLoaded", () => {
   const role = localStorage.getItem("role"); 
   const menuDiv = document.getElementById("menu");
@@ -116,17 +135,15 @@ document.addEventListener("DOMContentLoaded", () => {
         <a href="laporan.html" class="btn">Laporan</a>
         <a href="formulir.html" class="btn">Formulir</a>
       `;
-    } else {
+    } else if (role === "client") {
       menuDiv.innerHTML = `
         <a href="client.html" class="btn">Lihat Data</a>
         <a href="formulir.html" class="btn">Formulir</a>
       `;
+    } else {
+      menuDiv.innerHTML = `<p>Silakan login untuk melihat menu.</p>`;
     }
   }
 });
 
-function logout() {
-  localStorage.removeItem("role");
-  window.location.href = "index.html";
-}
 
