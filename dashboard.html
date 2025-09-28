@@ -5,6 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard</title>
   <link rel="stylesheet" href="assets/style/style.css">
+  <style>
+    iframe {
+      border: none;
+      width: 100%;
+      height: 80vh;
+      margin-top: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+    .content {
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
@@ -14,7 +27,13 @@
       <p>RSUD Dayakuraja Kota Bangun</p>
     </header>
 
-    <div id="menu" class="menu"></div>
+    <!-- Bagian konten -->
+    <div class="content">
+      <iframe
+        src="https://docs.google.com/spreadsheets/d/1UiXXF9bxhm3Xgk5pNT7AcmvjAcXr_tTvRvd60ML24rI/pubhtml?widget=true&amp;headers=false"
+        width="100%" height="80vh" frameborder="0">
+      </iframe>
+    </div>
 
     <button onclick="logout()" class="btn-logout">Logout</button>
   </div>
@@ -22,3 +41,5 @@
   <script src="script.js"></script>
 </body>
 </html>
+
+
