@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Asesmen Kompetensi</title>
+  <link rel="stylesheet" href="assets/style/style.css">
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const SUPABASE_URL = "https://utsyujgdlahuegjwpiab.supabase.co";
+    const SUPABASE_KEY =
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV0c3l1amdkbGFodWVnandwaWFiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgyOTMzOTMsImV4cCI6MjA3Mzg2OTM5M30.mNNJOlgYdYIYarrbu8CLALqQrfVEWd9eDZp1MN_x-Ls";
+
+    const supa = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("register-form");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+        const fullName = document.getElementById("full_name").value;
+        const role = document.getElementById("role").value;
+
+        // Daftar user di Supabase Auth
+        const { data, error } = await supa.auth.signUp({
+          email,
+          password,
+        });
+
+        if (error) {
+          alert("Gagal mendaftar: " + error.message);
+          return;
+        }
+
+        // Masukkan data tambahan ke tabel profiles
+        const { error: insertError } = await supa.from("profiles").insert([
+          {
+            id: data.user.id, // id dari supabase auth
+            full_name: fullName,
+            role: role,
+          },
+        ]);
+
+        if (insertError) {
+          alert("User dibuat tapi gagal simpan profile: " + insertError.message);
+        } else {
+          alert("Pendaftaran berhasil! Silakan login.");
+          window.location.href = "login.html";
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="container card-style">
+    <div class="header">
+      <img src="assets/images/logo4.png" alt="Logo" class="logo">
+      <h2>Register</h2>
+      <p>Buat akun baru untuk mengakses asesmen</p>
+    </div>
+
+    <form id="register-form" class="form-style">
+      <input type="text" id="full_name" placeholder="Nama Lengkap" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      
+      <select id="role" required>
+        <option value="">Pilih Role</option>
+        <option value="admin">Admin</option>
+        <option value="client">Client</option>
+      </select>
+
+      <button type="submit" class="btn-primary">Daftar</button>
+    </form>
+
+    <p style="margin-top: 10px;">
+      Sudah punya akun? <a href="login.html">Login di sini</a>
+    </p>
+  </div>
+</body>
+</html>
